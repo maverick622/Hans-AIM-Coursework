@@ -6,15 +6,19 @@ from enum import Enum
 from typing import Tuple
 
 
-class Facing(Enum):  # Facing 我们定义为一个枚举类，用于定义方向。如有疑问可以自行 Google / Ask AI
+class Facing(
+    Enum
+):  # Facing 我们定义为一个枚举类，用于定义方向。如有疑问可以自行 Google / Ask AI
     RIGHT = 0
     UP = 1
     LEFT = 2
     DOWN = 3
 
 
-class Grid():
-    def __init__(self, width: int, height: int, enemy_pos: tuple):  # DO NOT EDIT THIS METHOD
+class Grid:
+    def __init__(
+        self, width: int, height: int, enemy_pos: tuple
+    ):  # DO NOT EDIT THIS METHOD
         self.width: int = width
         self.height: int = height
         self._current_pos: tuple = (0, 0)
@@ -40,50 +44,78 @@ class Grid():
           - 将 x, y 强制转换为 int ，检查是否超出了宽高范围，如果任何一个超出则将其限制在最大宽高范围即可
           - 处理后存入 self._current_pos
         """
-        pass  # TODO: Question 1
+        if isinstance(value, tuple) == False or len(value) != 2:
+            raise TypeError("需要长度为2的元组")
+        x, y = int(value[0]), int(value[1])
+        x = max(0, min(x, self.width))
+        y = max(0, min(y, self.height))
+        self._current_pos = (x, y)
+        # pass  # TODO: Question 1
 
     def move_forward(self) -> Tuple[int, int]:  # type: ignore
-        '''
+        """
         让机器人向当前方向走一格
         返回新的坐标 (x,y) 同时更新成员变量
-        利用好上面的 setter
+        利用好上面的 s
         以右为X轴正方向，上为Y轴正方向
-        '''
-        pass  # TODO: Question 2
+        """
+        x, y = self._current_pos
+        if self.current_direction == Facing.RIGHT:
+            new_pos = (x + 1, y)
+        elif self.current_direction == Facing.UP:
+            new_pos = (x, y + 1)
+        elif self.current_direction == Facing.LEFT:
+            new_pos = (x - 1, y)
+        elif self.current_direction == Facing.DOWN:
+            new_pos = (x, y - 1)
+        self.current_pos = new_pos
+
+        # 返回新坐标
+        return self.current_pos
+        # pass  # TODO: Question 2
 
     def turn_left(self) -> Facing:  # type: ignore
-        '''
+        """
         让机器人逆时针转向
         返回一个新方向 (Facing.UP/DOWN/LEFT/RIGHT)
-        '''
-        pass  # TODO: Question 3a
+        """
+        new_direction_value = (self.current_direction.value + 1) % 4
+        self.current_direction = Facing(new_direction_value)
+        return self.current_direction
+        # pass  # TODO: Question 3a
 
     def turn_right(self) -> Facing:  # type: ignore
-        '''
+        """
         让机器人顺时针转向
-        '''
-        pass  # TODO: Question 3b
+        """
+        new_direction_value = (self.current_direction.value + 3) % 4
+        self.current_direction = Facing(new_direction_value)
+        return self.current_direction
+        # pass  # TODO: Question 3b
 
     def find_enemy(self) -> bool:  # type: ignore
-        '''
+        """
         如果找到敌人（机器人和敌人坐标一致），就返回true
-        '''
-        pass  # TODO: Question 4
+        """
+        return self.current_pos == self.enemy_pos
+        # pass  # TODO: Question 4
 
     def record_position(self, step: int) -> None:
-        '''
+        """
         将当前位置记录到 position_history 字典中
         键(key)为步数 step，值(value)为当前坐标 self.current_pos
         例如：step=1 时，记录 {1: (0, 0)}
-        '''
+        """
+        self.position_history[step] = self.current_pos
         pass  # TODO: Question 5a
 
     def get_position_at_step(self, step: int) -> tuple:  # type: ignore
-        '''
+        """
         从 position_history 字典中获取指定步数的坐标
         如果该步数不存在，返回 None
-        '''
-        pass  # TODO: Question 5b
+        """
+        return self.position_history.get(step)
+        # pass  # TODO: Question 5b
 
 
 """
@@ -108,4 +140,30 @@ class Grid():
     返回：曼哈顿距离值
 
 """
+
+
+class AdvancedGrid(Grid):
+    def __init__(
+        self, width: int, height: int, enemy_pos: tuple
+    ):  # DO NOT EDIT THIS METHOD
+        self.width: int = width
+        self.height: int = height
+        self._current_pos: tuple = (0, 0)
+        self.current_direction = Facing.UP
+        self.enemy_pos: tuple = enemy_pos
+        self.position_history: dict = {}  # 用于存储位置历史，键为步数，值为坐标
+        self.steps: int = 0
+
+    def move_forward(self):
+        new_pos = super().move_forward()
+        self.steps += 1
+        return new_pos
+
+    def distance_to_enemy(self):
+        robot_x, robot_y = self.current_pos
+        enemy_x, enemy_y = self.enemy_pos
+        distance = abs(robot_x - enemy_x) + abs(robot_y - enemy_y)
+        return distance
+
+
 # TODO: Question 6
